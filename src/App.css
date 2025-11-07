@@ -1,0 +1,186 @@
+/* Global app styles (kept minimal) */
+body {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  background: #f7f9fc;
+}
+
+/* Formulario styles (primary color: #275EA7) */
+.formulario {
+  max-width: 500px;
+  margin: 28px auto;
+  padding: 30px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff, #f6f9ff);
+  box-shadow: 0 6px 18px rgba(39, 94, 167, 0.08);
+  border: 1px solid rgba(39, 94, 167, 0.08);
+  color: #1f2d3d;
+  text-align: left;
+}
+
+.formulario .field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.formulario .field > span {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #275ea7;
+}
+
+.formulario .select,
+.formulario .input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #dbe7fb;
+  background: #fff;
+  font-size: 14px;
+  color: #0b2440;
+  box-sizing: border-box;
+}
+
+.formulario .radio-group {
+  border: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+}
+
+.formulario .radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+  margin-bottom: 3px;
+  color: #275ea7;
+  font-weight: 500;
+}
+
+.formulario input[type="radio"] {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-primary {
+  display: inline-block;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  background-color: #275ea7;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.06s ease;
+}
+
+.btn-primary:hover {
+  background-color: #1f4aa0;
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* App Layout */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+}
+
+/* Header Municipal */
+.header-muni {
+  padding: 10px 20px;
+  text-align: center;
+}
+
+.header-logo {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Footer Municipal */
+.footer-muni {
+  padding: 20px 0;
+  text-align: center;
+}
+
+/* Contenedor principal del footer */
+.footer-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-capital {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Contenedor de iconos de redes sociales */
+.footer-social-icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.footer-social-icons a {
+  display: inline-flex;
+  flex-shrink: 1;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.footer-social-icons a:hover {
+  transform: scale(1.1);
+  opacity: 0.8;
+}
+
+.footer-social-icons img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+/* Media query para móviles */
+@media (max-width: 1100px) {
+  /* Cambiar a flex column en mobile */
+  .footer-content {
+    flex-direction: column;
+    gap: 40px;
+  }
+}
+
+/* Media query para pantallas pequeñas */
+@media (max-width: 480px) {
+  .footer-social-icons {
+    gap: 8px;
+  }
+
+  .footer-social-icons img {
+    width: 35px;
+    height: 35px;
+  }
+}
