@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+// import axios from "axios"; // Descomentar cuando se use la API real
 
 function Formulario() {
+  const navigate = useNavigate();
   const [sector, setSector] = useState(1);
   const [referencia, setReferencia] = useState("");
   const [emision, setEmision] = useState("total");
@@ -9,20 +11,60 @@ function Formulario() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = { sector, referencia, emision, fecha };
+
+    // ============================================
+    // OPCIÓN 1: Datos ficticios (ACTIVO AHORA)
+    // ============================================
+    const datosFicticios = [
+      {
+        emision: "08/11/2025",
+        vencimiento: "10/11/2025",
+        detalle: "Emision de Deuda WEB",
+        numero: "122542/0-2025",
+        importe: "$28.777,93",
+      },
+    ];
+
+    // Navegar a la tabla con los datos ficticios
+    navigate("/resultados", { state: { resultados: datosFicticios } });
+
+    // ============================================
+    // OPCIÓN 2: Uso de API real (COMENTADO)
+    // ============================================
+    // Para activar la API real:
+    // 1. Descomentar el import de axios arriba
+    // 2. Comentar el código de datos ficticios (líneas 15-26)
+    // 3. Descomentar el código a continuación
+    /*
+    const data = { 
+      sector, 
+      referencia, 
+      emision, 
+      fecha 
+    };
 
     try {
       const res = await axios.post("http://localhost:8080/api/deuda", data, {
         headers: { "Content-Type": "application/json" },
       });
-      console.log(res.data);
-      // optional: handle res.data (show success message, navigate, etc.)
+      
+      // Asumiendo que la API devuelve un array de resultados
+      // Ajustar según la estructura real de la respuesta
+      const resultados = res.data.resultados || res.data;
+      
+      // Navegar a la tabla con los datos de la API
+      navigate("/resultados", { state: { resultados } });
+      
     } catch (error) {
       console.error(
-        "Error posting deuda:",
+        "Error obteniendo deuda:",
         error?.response?.data ?? error.message ?? error
       );
+      
+      // Opcional: Mostrar mensaje de error al usuario
+      // alert("Error al obtener los datos. Por favor, intente nuevamente.");
     }
+    */
   };
 
   useEffect(() => {

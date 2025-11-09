@@ -184,3 +184,176 @@ body {
     height: 35px;
   }
 }
+
+/* Estilos para la Tabla de Resultados */
+.tabla-container {
+  max-width: 1200px;
+  margin: 28px auto;
+  padding: 30px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff, #f6f9ff);
+  box-shadow: 0 6px 18px rgba(39, 94, 167, 0.08);
+  border: 1px solid rgba(39, 94, 167, 0.08);
+}
+
+.tabla-title {
+  color: #275ea7;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.tabla-wrapper {
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+
+.tabla-resultados {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(39, 94, 167, 0.06);
+}
+
+.tabla-resultados thead {
+  background-color: #275ea7;
+  color: white;
+}
+
+.tabla-resultados th {
+  padding: 14px 12px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+
+.tabla-resultados tbody tr {
+  border-bottom: 1px solid #e8f0fe;
+  transition: background-color 0.15s ease;
+}
+
+.tabla-resultados tbody tr:hover {
+  background-color: #f6f9ff;
+}
+
+.tabla-resultados tbody tr:last-child {
+  border-bottom: none;
+}
+
+.tabla-resultados td {
+  padding: 14px 12px;
+  color: #1f2d3d;
+  font-size: 14px;
+}
+
+.tabla-resultados td.importe {
+  font-weight: 700;
+  color: #275ea7;
+  font-size: 15px;
+}
+
+.tabla-resultados td.acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-pagar,
+.btn-pdf {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-pagar {
+  background-color: #275ea7;
+  color: white;
+}
+
+.btn-pagar:hover {
+  background-color: #1f4aa0;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(39, 94, 167, 0.2);
+}
+
+.btn-pdf {
+  background-color: #f0f4fa;
+  color: #275ea7;
+  border: 1px solid #dbe7fb;
+}
+
+.btn-pdf:hover {
+  background-color: #e3ecf8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(39, 94, 167, 0.12);
+}
+
+.btn-volver {
+  display: inline-block;
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 1px solid #275ea7;
+  background-color: transparent;
+  color: #275ea7;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-volver:hover {
+  background-color: #275ea7;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.no-resultados {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.no-resultados p {
+  color: #1f2d3d;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+/* Responsive para tabla */
+@media (max-width: 768px) {
+  .tabla-container {
+    padding: 20px;
+    margin: 15px;
+  }
+
+  .tabla-wrapper {
+    overflow-x: scroll;
+  }
+
+  .tabla-resultados {
+    font-size: 12px;
+  }
+
+  .tabla-resultados th,
+  .tabla-resultados td {
+    padding: 10px 8px;
+  }
+
+  .btn-pagar,
+  .btn-pdf {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .tabla-resultados td.acciones {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
