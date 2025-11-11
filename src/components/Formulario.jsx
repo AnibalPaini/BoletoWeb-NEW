@@ -1,76 +1,113 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios"; // Descomentar cuando se use la API real
+import axios from "axios"; // ✅ Descomentado para usar la API real
+import Loading from "./Loading.jsx";
 
 function Formulario() {
   const navigate = useNavigate();
   const [sector, setSector] = useState(1);
   const [referencia, setReferencia] = useState("");
-  const [emision, setEmision] = useState("total");
+  const [emision, setEmision] = useState("getDeuda");
   const [fecha, setFecha] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMensaje, setErrorMensaje] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // ============================================
-    // OPCIÓN 1: Datos ficticios (ACTIVO AHORA)
-    // ============================================
-    const datosFicticios = [
-      {
-        emision: "08/11/2025",
-        vencimiento: "10/11/2025",
-        detalle: "Emision de Deuda WEB",
-        numero: "122542/0-2025",
-        importe: "$28.777,93",
-      },
-    ];
-
-    // Navegar a la tabla con los datos ficticios
-    navigate("/resultados", { state: { resultados: datosFicticios } });
-
-    // ============================================
-    // OPCIÓN 2: Uso de API real (COMENTADO)
-    // ============================================
-    // Para activar la API real:
-    // 1. Descomentar el import de axios arriba
-    // 2. Comentar el código de datos ficticios (líneas 15-26)
-    // 3. Descomentar el código a continuación
-    /*
-    const data = { 
-      sector, 
-      referencia, 
-      emision, 
-      fecha 
-    };
+    setLoading(true);
+    setErrorMensaje(null);
+    if (!referencia) {
+      setErrorMensaje("Por favor, ingrese una referencia válida.");
+      setLoading(false);
+      return;
+    }
 
     try {
-      const res = await axios.post("http://localhost:8080/api/deuda", data, {
-        headers: { "Content-Type": "application/json" },
-      });
-      
-      // Asumiendo que la API devuelve un array de resultados
-      // Ajustar según la estructura real de la respuesta
-      const resultados = res.data.resultados || res.data;
-      
-      // Navegar a la tabla con los datos de la API
-      navigate("/resultados", { state: { resultados } });
-      
-    } catch (error) {
-      console.error(
-        "Error obteniendo deuda:",
-        error?.response?.data ?? error.message ?? error
-      );
-      
-      // Opcional: Mostrar mensaje de error al usuario
-      // alert("Error al obtener los datos. Por favor, intente nuevamente.");
-    }
-    */
-  };
+      const url = "http://localhost:8080/api/deuda";
 
-  useEffect(() => {
-    console.log(sector);
-    console.log(fecha);
-  }, [sector, fecha]);
+      const formData = new URLSearchParams();
+      formData.append("ofic99", sector);
+      formData.append("padron", referencia);
+      formData.append("action", emision);
+      formData.append("fvtoStr", fecha || "11/11/2025");
+
+      // Pedimos la respuesta como blob (puede ser JSON o PDF)
+      const res = await axios.post(url, formData, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        responseType: "blob",
+      });
+
+      const contentType = res.headers["content-type"];
+
+      // 🔹 Si viene PDF → descargarlo
+      if (contentType === "application/pdf") {
+        const blob = new Blob([res.data], { type: "application/pdf" });
+        const pdfUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = pdfUrl;
+        link.download = `libreDeuda_${referencia}.pdf`;
+        link.click();
+        setLoading(false);
+        return; // no seguimos a resultados
+      }
+
+      // 🔹 Si viene JSON → parsear y mostrar resultados
+      const textData = await res.data.text();
+      const resultados = JSON.parse(textData);
+
+      console.log("Resultados recibidos:", resultados);
+
+      // Verificar si hay resultados
+      if (!resultados || resultados.length === 0) {
+        setErrorMensaje(
+          "No se han encontrado registros de deuda para la referencia ingresada."
+        );
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+      navigate("/resultados", {
+        state: {
+          resultados,
+          tipoEmision: emision,
+          sector,
+          referencia,
+          fecha,
+        },
+      });
+    } catch (error) {
+      setLoading(false);
+
+      // Mensajes de error más específicos
+      if (error.response) {
+        // El servidor respondió con un código de error
+        if (error.response.status === 404) {
+          setErrorMensaje(
+            "No se encontraron registros para la referencia ingresada."
+          );
+        } else if (error.response.status === 500) {
+          setErrorMensaje(
+            "Error en el servidor. Por favor, intente nuevamente más tarde."
+          );
+        } else {
+          setErrorMensaje(
+            `Error: ${error.response.status}. Por favor, intente nuevamente.`
+          );
+        }
+      } else if (error.request) {
+        // La petición se hizo pero no hubo respuesta
+        setErrorMensaje(
+          "No se pudo conectar con el servidor. Verifique su conexión."
+        );
+      } else {
+        // Algo pasó al configurar la petición
+        setErrorMensaje(
+          "Error al procesar la solicitud. Por favor, intente nuevamente."
+        );
+      }
+    }
+  };
 
   return (
     <form className="formulario" onSubmit={handleSubmit}>
@@ -106,9 +143,9 @@ function Formulario() {
         <label className="radio">
           <input
             type="radio"
-            name="emision"
-            value="total"
-            checked={emision === "total"}
+            name="getDeuda"
+            value="getDeuda"
+            checked={emision === "getDeuda"}
             onChange={(e) => setEmision(e.target.value)}
           />{" "}
           Deuda Total
@@ -116,19 +153,19 @@ function Formulario() {
         <label className="radio">
           <input
             type="radio"
-            name="emision"
-            value="moratoria"
-            checked={emision === "moratoria"}
+            name="getMoratoria"
+            value="getMoratoria"
+            checked={emision === "getMoratoria"}
             onChange={(e) => setEmision(e.target.value)}
           />{" "}
-          Moratoria 2024
+          Moratoria 2025
         </label>
         <label className="radio">
           <input
             type="radio"
-            name="duplicado"
-            value="duplicado"
-            checked={emision === "duplicado"}
+            name="getBoletos"
+            value="getBoletos"
+            checked={emision === "getBoletos"}
             onChange={(e) => setEmision(e.target.value)}
           />{" "}
           Duplicado última facturación
@@ -136,9 +173,9 @@ function Formulario() {
         <label className="radio">
           <input
             type="radio"
-            name="seleccion_deuda"
-            value="seleccion_deuda"
-            checked={emision === "seleccion_deuda"}
+            name="getSeleccion"
+            value="getSeleccion"
+            checked={emision === "getSeleccion"}
             onChange={(e) => setEmision(e.target.value)}
           />{" "}
           Selección de Deuda
@@ -148,20 +185,21 @@ function Formulario() {
       <label className="field">
         <span>Fecha Vencimiento</span>
         <select
-          name=""
-          id=""
           className="input"
+          value={fecha}
           onChange={(e) => setFecha(e.target.value)}
         >
-          <option value="1">Opción 1</option>
-          <option value="2">Opción 2</option>
-          <option value="3">Opción 3</option>
+          <option value="11/11/2025">11/11/2025</option>
+          <option value="10/12/2025">10/12/2025</option>
+          <option value="09/01/2026">09/01/2026</option>
         </select>
       </label>
 
       <button className="btn-primary" type="submit">
         Procesar
       </button>
+      {loading && <Loading />}
+      {errorMensaje && <div className="error-message">{errorMensaje}</div>}
     </form>
   );
 }

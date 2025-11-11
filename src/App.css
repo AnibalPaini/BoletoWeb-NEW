@@ -6,6 +6,7 @@ body {
   text-align: center;
   color: #2c3e50;
   background: #f7f9fc;
+  margin: 0;
 }
 
 /* Formulario styles (primary color: #275EA7) */
@@ -89,6 +90,30 @@ body {
   transform: translateY(0);
 }
 
+.error-message {
+  margin-top: 15px;
+  padding: 12px 16px;
+  background-color: #fee;
+  border: 2px solid #f44336;
+  border-radius: 8px;
+  color: #c62828;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* App Layout */
 .app-layout {
   display: flex;
@@ -116,7 +141,8 @@ body {
 
 /* Footer Municipal */
 .footer-muni {
-  padding: 20px 0;
+  padding: 0;
+  margin: 0 0 10px 0;
   text-align: center;
 }
 
@@ -194,6 +220,35 @@ body {
   background: linear-gradient(180deg, #ffffff, #f6f9ff);
   box-shadow: 0 6px 18px rgba(39, 94, 167, 0.08);
   border: 1px solid rgba(39, 94, 167, 0.08);
+  position: relative;
+}
+
+.btn-volver-flecha {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #275ea7;
+  background-color: white;
+  color: #275ea7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.btn-volver-flecha:hover {
+  background-color: #275ea7;
+  color: white;
+  transform: translateX(-2px);
+}
+
+.btn-volver-flecha:active {
+  transform: translateX(-1px);
 }
 
 .tabla-title {
@@ -225,7 +280,7 @@ body {
 
 .tabla-resultados th {
   padding: 14px 12px;
-  text-align: left;
+  text-align: center;
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.3px;
@@ -248,12 +303,14 @@ body {
   padding: 14px 12px;
   color: #1f2d3d;
   font-size: 14px;
+  text-align: center;
 }
 
 .tabla-resultados td.importe {
   font-weight: 700;
   color: #275ea7;
   font-size: 15px;
+  text-align: center;
 }
 
 .tabla-resultados td.acciones {
@@ -297,6 +354,7 @@ body {
   box-shadow: 0 3px 8px rgba(39, 94, 167, 0.12);
 }
 
+/* Botón volver antiguo - ya no se usa
 .btn-volver {
   display: inline-block;
   padding: 10px 24px;
@@ -314,6 +372,7 @@ body {
   color: white;
   transform: translateY(-1px);
 }
+*/
 
 .no-resultados {
   text-align: center;
@@ -326,34 +385,372 @@ body {
   margin-bottom: 20px;
 }
 
-/* Responsive para tabla */
-@media (max-width: 768px) {
+/* Estilos para checkbox y total seleccionado */
+.checkbox-cell {
+  text-align: center;
+  width: 80px;
+}
+
+.checkbox-cell input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #275ea7;
+}
+
+.total-seleccionado {
+  background: linear-gradient(180deg, #ffffff, #f6f9ff);
+  border: 2px solid #275ea7;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.total-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.total-seleccionado h3 {
+  color: #275ea7;
+  font-size: 20px;
+  margin: 0;
+}
+
+.btn-seleccionar-todos {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 2px solid #275ea7;
+  background-color: white;
+  color: #275ea7;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-seleccionar-todos:hover {
+  background-color: #275ea7;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.total-monto {
+  color: #1f4aa0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.botones-seleccionados {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.btn-pagar-seleccionados,
+.btn-emitir-boleto {
+  display: inline-block;
+  padding: 12px 32px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.06s ease;
+}
+
+.btn-pagar-seleccionados {
+  background-color: #275ea7;
+}
+
+.btn-pagar-seleccionados:hover {
+  background-color: #1f4aa0;
+  transform: translateY(-1px);
+}
+
+.btn-emitir-boleto {
+  background-color: #28a745;
+}
+
+.btn-emitir-boleto:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+}
+
+.btn-pagar-seleccionados:active,
+.btn-emitir-boleto:active {
+  transform: translateY(0);
+}
+
+.datos-referencia-tabla {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  text-align: center;
+  color: #1f2d3d;
+  margin-bottom: 10px;
+}
+
+.datos-referencia-tabla p {
+  margin: 2px 0;
+}
+
+/* Responsive para tablets */
+@media (max-width: 1024px) {
   .tabla-container {
     padding: 20px;
-    margin: 15px;
-  }
-
-  .tabla-wrapper {
-    overflow-x: scroll;
+    margin: 20px;
   }
 
   .tabla-resultados {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .tabla-resultados th,
   .tabla-resultados td {
-    padding: 10px 8px;
+    padding: 12px 10px;
   }
 
   .btn-pagar,
   .btn-pdf {
-    padding: 6px 10px;
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+
+  .total-header {
+    gap: 15px;
+  }
+}
+
+/* Responsive para tabla */
+@media (max-width: 768px) {
+  .tabla-container {
+    padding: 15px;
+    margin: 10px;
+  }
+
+  .btn-volver-flecha {
+    top: 10px;
+    left: 10px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .btn-volver-flecha svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .tabla-title {
+    font-size: 20px;
+    margin-top: 30px;
+    margin-bottom: 16px;
+  }
+
+  .datos-referencia-tabla {
+    font-size: 13px;
+  }
+
+  /* Ocultar encabezados de la tabla en móvil */
+  .tabla-resultados thead {
+    display: none;
+  }
+
+  /* Convertir filas en tarjetas */
+  .tabla-resultados,
+  .tabla-resultados tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .tabla-resultados tr {
+    display: block;
+    margin-bottom: 15px;
+    border: 2px solid #275ea7;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 6px rgba(39, 94, 167, 0.1);
+    padding: 12px;
+  }
+
+  .tabla-resultados td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px !important;
+    border: none !important;
+    text-align: right !important;
+    font-size: 13px;
+    border-bottom: 1px solid #f0f0f0 !important;
+  }
+
+  .tabla-resultados td:last-child {
+    border-bottom: none !important;
+  }
+
+  /* Agregar etiquetas antes de cada celda */
+  .tabla-resultados td:before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: #275ea7;
+    text-align: left;
+    margin-right: 10px;
+    flex: 0 0 40%;
+  }
+
+  /* Estilos específicos para checkbox */
+  .tabla-resultados td.checkbox-cell {
+    justify-content: center;
+    background-color: #f6f9ff;
+    border-radius: 6px;
+  }
+
+  .tabla-resultados td.checkbox-cell:before {
+    content: "Seleccionar";
+  }
+
+  .tabla-resultados td.checkbox-cell input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+  }
+
+  /* Estilos para importes */
+  .tabla-resultados td.importe {
+    font-weight: 700;
+    font-size: 15px;
+    color: #275ea7;
+    background-color: #f6f9ff;
+    border-radius: 6px;
+  }
+
+  /* Estilos para acciones */
+  .tabla-resultados td.acciones {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 10px !important;
+  }
+
+  .tabla-resultados td.acciones:before {
+    content: "";
+    display: none;
+  }
+
+  .btn-pagar,
+  .btn-pdf {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  /* Total seleccionado responsive */
+  .total-seleccionado {
+    padding: 15px;
+  }
+
+  .total-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .total-header h3 {
+    font-size: 18px;
+    order: -1;
+  }
+
+  .btn-seleccionar-todos {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .botones-seleccionados {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-pagar-seleccionados,
+  .btn-emitir-boleto {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}
+
+/* Responsive para móviles muy pequeños */
+@media (max-width: 480px) {
+  .tabla-container {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 8px;
+  }
+
+  .btn-volver-flecha {
+    top: 8px;
+    left: 8px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-volver-flecha svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .tabla-title {
+    font-size: 18px;
+    margin-top: 25px;
+  }
+
+  .tabla-resultados tr {
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+
+  .tabla-resultados td {
+    font-size: 12px;
+    padding: 6px 8px !important;
+  }
+
+  .tabla-resultados td:before {
     font-size: 12px;
   }
 
-  .tabla-resultados td.acciones {
-    flex-direction: column;
-    gap: 6px;
+  .total-seleccionado {
+    padding: 12px;
   }
+
+  .total-header h3 {
+    font-size: 16px;
+  }
+
+  .total-monto {
+    font-size: 20px;
+  }
+
+  .datos-referencia-tabla {
+    font-size: 12px;
+  }
+}
+
+.contenedor-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  background-color: black;
+  opacity: 0.8;
 }
