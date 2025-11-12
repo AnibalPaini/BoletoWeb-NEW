@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import Loading from "./Loading.jsx";
+import { descargarPDF } from "../services/services.js";
+
 
 function TablaResultados() {
   const location = useLocation();
@@ -9,15 +13,29 @@ function TablaResultados() {
   const sector = location.state?.sector || "";
   const referencia = location.state?.referencia || "";
   const fecha = location.state?.fecha || "";
+  const [loading, setLoading] = useState(false);
+  const [errorMensaje, setErrorMensaje] = useState(null);   
+
 
   const [itemsSeleccionados, setItemsSeleccionados] = useState([]);
+  const url = "http://localhost:8080/api/";
 
-  const handlePagarOnline = (item) => {
-    console.log("🪙 Pagar online:", item, location.state);
+  const handlePagarOnline = async() => {
+    try {
+      const res = await axios.post(url+"pagar", {
+        concepto:1,
+        action: "EPagosPagoSolicitud",
+      });
+      console.log(res);
+    
+    } catch (error) {
+      console.log(error);
+      
+    }
   };
 
-  const handleDescargarPDF = (item) => {
-    console.log("📄 Descargar PDF:", item);
+  const handleDescargarPDF = async(item) => {
+    await descargarPDF(item.serializedId);
   };
 
   const handleVolver = () => navigate("/");
@@ -83,6 +101,71 @@ function TablaResultados() {
         };
       });
       setItemsSeleccionados(todosSeleccionados);
+    }
+  };
+
+  const handlerEmitirBoleto = async () => {
+    if (itemsSeleccionados.length === 0) {
+      alert("Por favor, seleccione al menos un item para emitir el boleto.");
+      return;
+    }
+    setLoading(true);
+    setErrorMensaje(null);
+
+    try {
+      const formData = new URLSearchParams();
+      // Movimientos seleccionados
+      const movimientos = itemsSeleccionados.map((item) => item.checkbox);
+      if (Array.isArray(movimientos)) {
+        movimientos.forEach((m) => {
+          const limpio = m.split("_")[0];
+          formData.append("movimientos", limpio);
+          console.log(limpio);
+        });
+      } else if (movimientos) {
+        const limpio = movimientos.split(",").slice(0, 4).join(",");
+        console.log(limpio);
+
+        formData.append("movimientos", limpio);
+      }
+
+      // Creamos el formulario igual al backend original
+
+      formData.append("action", "getDeudaSeleccionada");
+      formData.append("padron", referencia);
+      formData.append("fvtoStr", fecha || ""); // por si es vacío
+      formData.append("ofic99", sector || ""); // por si es vacío
+
+      console.log("📤 Enviando payload (form):", formData.toString());
+
+      const res = await axios.post(url+"deuda", formData, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        responseType: "blob",
+      });
+
+      const textData = await res.data.text();
+      const resultadosEmision = JSON.parse(textData);
+      console.log("Resultados recibidos:", resultadosEmision);
+      if (!resultadosEmision || resultadosEmision.length === 0) {
+        setErrorMensaje(
+          "No se han encontrado registros de deuda para la referencia ingresada."
+        );
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+      navigate("/resultados-emision", {
+        state: {
+          resultados: resultadosEmision,
+        },
+      });
+    } catch (error) {
+      console.error("❌ Error al emitir boleto:", error);
+      if (error.res?.data) {
+        console.log("🪵 Respuesta del backend (error):", error.res.data);
+      }
+      alert("Error al emitir el boleto. Por favor, intente nuevamente.");
     }
   };
 
@@ -243,22 +326,21 @@ function TablaResultados() {
                 <div className="botones-seleccionados">
                   <button
                     className="btn-emitir-boleto"
-                    onClick={() =>
-                      console.log("🎫 Emitir boleto:", itemsSeleccionados)
-                    }
+                    onClick={handlerEmitirBoleto}
                   >
                     Emitir Boleto
                   </button>
                   <button
                     className="btn-pagar-seleccionados"
                     onClick={() =>
-                      console.log("💳 Pagar seleccionados:", itemsSeleccionados)
+                      handlePagarOnline()
                     }
                   >
                     Pagar Seleccionados
                   </button>
                 </div>
               )}
+              {loading && <Loading />}
             </div>
           )}
         </>
