@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { descargarPDF, pagarBoleto } from "../services/services";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -6,16 +6,21 @@ const TablaEmitirBoleto = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const resultados = location.state?.resultados || [];
-  const handleVolver = () => navigate("/resultados");
+  const referencia = location.state?.referencia || "";
+
+  const handleVolver = () => navigate("/", {state: {referencia}});
   const serializedId = location.state?.resultados[0]?.serializedId || null;
 
+  useEffect(() => {
+    console.log("Resultados en TablaEmitirBoleto:", resultados);
+  }, []);
+
   const handlePagarOnline = async(resultados) => {
-    console.log(resultados.serializedId);
-    
-    await pagarBoleto({ serializedId: resultados.serializedId });
+    await pagarBoleto({ serializedId: resultados.serializedId,  boletoBPStr: "BoletoWebSessionFactory" });
   };
-  const handleDescargarPDF = async (serializedId) => {
-    await descargarPDF(serializedId);
+
+  const handleDescargarPDF = async (serializedId, concepto=1, boletoBPStr= "BoletoWebSessionFactory") => {
+    await descargarPDF(serializedId, concepto, boletoBPStr);
   };
 
   return (

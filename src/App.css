@@ -315,6 +315,7 @@ body {
 
 .tabla-resultados td.acciones {
   display: flex;
+  justify-content: center;
   gap: 8px;
   flex-wrap: wrap;
 }
@@ -411,7 +412,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+
   gap: 20px;
   flex-wrap: wrap;
 }
@@ -477,11 +478,11 @@ body {
 }
 
 .btn-emitir-boleto {
-  background-color: #28a745;
+  background-color: #275ea7;
 }
 
 .btn-emitir-boleto:hover {
-  background-color: #218838;
+  background-color: #1f4aa0;
   transform: translateY(-1px);
 }
 
@@ -743,14 +744,15 @@ body {
 }
 
 .contenedor-loading {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  width: 100%;
-  background-color: black;
-  opacity: 0.8;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  backdrop-filter: blur(3px);
 }

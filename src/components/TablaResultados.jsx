@@ -2,43 +2,48 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Loading from "./Loading.jsx";
-import { descargarPDF } from "../services/services.js";
-
+import { descargarPDF, pagarBoleto } from "../services/services.js";
 
 function TablaResultados() {
   const location = useLocation();
   const navigate = useNavigate();
   const resultados = location.state?.resultados || [];
-  const tipoEmision = location.state?.tipoEmision || "total";
+  const tipoEmision = location.state?.tipoEmision;
   const sector = location.state?.sector || "";
   const referencia = location.state?.referencia || "";
   const fecha = location.state?.fecha || "";
   const [loading, setLoading] = useState(false);
-  const [errorMensaje, setErrorMensaje] = useState(null);   
-
+  const [errorMensaje, setErrorMensaje] = useState(null);
 
   const [itemsSeleccionados, setItemsSeleccionados] = useState([]);
   const url = "http://localhost:8080/api/";
 
-  const handlePagarOnline = async() => {
-    try {
-      const res = await axios.post(url+"pagar", {
-        concepto:1,
-        action: "EPagosPagoSolicitud",
-      });
-      console.log(res);
-    
-    } catch (error) {
-      console.log(error);
-      
+  const handlePagarOnline = async (resultados) => {
+    let concepto = 1;
+    let boletoBPStr = "BoletoWebSessionFactory";
+    if (tipoEmision === "getBoletos") {
+      concepto = 2;
+      boletoBPStr = "BoletoSessionFactory";
     }
+    await pagarBoleto({
+      serializedId: resultados.serializedId,
+      concepto,
+      boletoBPStr,
+    });
   };
 
-  const handleDescargarPDF = async(item) => {
-    await descargarPDF(item.serializedId);
+  const handleDescargarPDF = async (item) => {
+    let concepto = 1;
+    let boletoBPStr = "BoletoWebSessionFactory";
+
+    if (tipoEmision === "getBoletos") {
+      concepto = 2;
+      boletoBPStr = "BoletoSessionFactory";
+    }
+    await descargarPDF(item.serializedId, concepto, boletoBPStr);
   };
 
-  const handleVolver = () => navigate("/");
+  const handleVolver = () => navigate("/", { state: { sector, referencia, fecha, tipoEmision } });
 
   // Manejar selección de checkbox
   const handleCheckboxChange = (index, item) => {
@@ -53,10 +58,6 @@ function TablaResultados() {
       .trim();
 
     const importeNumerico = parseFloat(importeLimpio) || 0;
-
-    console.log(
-      `Procesando: ${importeStr} -> ${importeLimpio} -> ${importeNumerico}`
-    );
 
     if (itemsSeleccionados.some((sel) => sel.index === index)) {
       setItemsSeleccionados(
@@ -120,11 +121,10 @@ function TablaResultados() {
         movimientos.forEach((m) => {
           const limpio = m.split("_")[0];
           formData.append("movimientos", limpio);
-          console.log(limpio);
         });
       } else if (movimientos) {
         const limpio = movimientos.split(",").slice(0, 4).join(",");
-        console.log(limpio);
+
 
         formData.append("movimientos", limpio);
       }
@@ -136,16 +136,13 @@ function TablaResultados() {
       formData.append("fvtoStr", fecha || ""); // por si es vacío
       formData.append("ofic99", sector || ""); // por si es vacío
 
-      console.log("📤 Enviando payload (form):", formData.toString());
-
-      const res = await axios.post(url+"deuda", formData, {
+      const res = await axios.post(url + "deuda", formData, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         responseType: "blob",
       });
 
       const textData = await res.data.text();
       const resultadosEmision = JSON.parse(textData);
-      console.log("Resultados recibidos:", resultadosEmision);
       if (!resultadosEmision || resultadosEmision.length === 0) {
         setErrorMensaje(
           "No se han encontrado registros de deuda para la referencia ingresada."
@@ -158,13 +155,10 @@ function TablaResultados() {
       navigate("/resultados-emision", {
         state: {
           resultados: resultadosEmision,
+          referencia,
         },
       });
-    } catch (error) {
-      console.error("❌ Error al emitir boleto:", error);
-      if (error.res?.data) {
-        console.log("🪵 Respuesta del backend (error):", error.res.data);
-      }
+    } catch {
       alert("Error al emitir el boleto. Por favor, intente nuevamente.");
     }
   };
@@ -216,9 +210,7 @@ function TablaResultados() {
           : "Deuda Total"}
       </h2>
       <div className="datos-referencia-tabla">
-        <p>Sector:{sector}</p>
         <p>Padron: {referencia}</p>
-        <p>Vencimiento: {fecha}</p>
       </div>
 
       {resultados.length > 0 ? (
@@ -281,7 +273,7 @@ function TablaResultados() {
                       <td className="acciones">
                         <button
                           className="btn-pagar"
-                          onClick={() => handlePagarOnline(item)}
+                          onClick={() => handlePagarOnline(resultados[index])}
                         >
                           Pagar Online
                         </button>
@@ -330,17 +322,12 @@ function TablaResultados() {
                   >
                     Emitir Boleto
                   </button>
-                  <button
-                    className="btn-pagar-seleccionados"
-                    onClick={() =>
-                      handlePagarOnline()
-                    }
-                  >
-                    Pagar Seleccionados
-                  </button>
                 </div>
               )}
               {loading && <Loading />}
+              {errorMensaje && (
+                <div className="error-message">{errorMensaje}</div>
+              )}
             </div>
           )}
         </>

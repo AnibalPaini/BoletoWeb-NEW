@@ -1,11 +1,16 @@
 import axios from "axios";
 
-export const descargarPDF = async (serializedId) => {
+// Descarga el PDF y maneja la sesión de calentamiento
+export const descargarPDF = async (serializedId, concepto, boletoBPStr) => {
   try {
     // La llamada al API que devuelve el PDF binario
     const res = await axios.post(
       "http://localhost:8080/api/pdf",
-      { serializedId },
+      {
+        serializedId,
+        concepto,
+        boletoBPStr,
+      },
       {
         responseType: "blob",
       }
@@ -25,40 +30,60 @@ export const descargarPDF = async (serializedId) => {
     a.remove();
     window.URL.revokeObjectURL(url);
     console.log("PDF descargado con éxito.");
-  } catch {
-    alert("No se pudo descargar el PDF. Vuelve a intentarlo más tarde.");
+  } catch (error) {
+    // Mejor manejo de errores para mostrar el detalle del backend
+    const errorDetail =
+      error.response && error.response.data
+        ? JSON.parse(await error.response.data.text()).error
+        : "No se pudo conectar con el servidor.";
+
+    console.error("Error en la descarga de PDF:", errorDetail);
+    alert(`No se pudo descargar el PDF. Detalle: ${errorDetail}`);
   }
 };
 
-export const pagarBoleto = async ({ serializedId }) => {
+export const pagarBoleto = async ({ serializedId, concepto, boletoBPStr }) => {
   const API_URL = "http://localhost:8080/api/pagar";
-  console.log(`Iniciando solicitud de pago para ID de boleto: ${serializedId}`);
 
   try {
-    const formData = new URLSearchParams({
-      boletoSerializedId: serializedId,
-      concepto: 1,
-      boletoBPStr: "BoletoWebSessionFactory",
-      action: "EPagosPagoSolicitud",
-    }).toString();
-
-    const res = await axios.post(API_URL, formData, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+    const res = await axios.post(
+      API_URL,
+      {
+        boletoSerializedId: serializedId,
+        concepto: concepto || 1,
+        boletoBPStr,
       },
-    });
+      { headers: { "Content-Type": "application/json" } }
+    );
 
-    const { redirectUrl } = res.data;
+    const { redirectUrl, fields } = res.data;
 
-    if (redirectUrl) {
-      console.log(`🔗 Redirigiendo a E-Pagos: ${redirectUrl}`);
-      window.open(redirectUrl, "_blank");
-    } else {
-      console.error("⚠️ No se encontró el link de E-Pagos.");
-      alert("No se pudo obtener la URL de pago.");
+    if (!redirectUrl || !fields) {
+      alert("No se pudo obtener la información de E-Pagos.");
+      return;
     }
+
+    // 🧾 Crear formulario temporal y enviarlo
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = redirectUrl;
+    form.target = "_blank"; // abre en nueva pestaña
+
+    for (const [key, value] of Object.entries(fields)) {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = key;
+      input.value = value;
+      form.appendChild(input);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+
+    console.log("✅ Redirigido a E-Pagos");
   } catch (error) {
     console.error("❌ Error al procesar el pago:", error.message);
-    alert("Error al intentar pagar. Revisa la consola.");
+    alert("Error al intentar pagar. Revisá la consola.");
   }
 };
